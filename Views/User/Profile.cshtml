@@ -1,0 +1,140 @@
+﻿@model EventOrganizer_ASP.NET.ViewModels.UserProfileVM
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "Profile";
+    var showPassword = TempData["ShowPassword"] != null;
+    var initials = string.Join("", Model.FullName.Split(' ')[0][0].ToString(),
+                            Model.FullName.Split(' ').Length > 1
+                                ? Model.FullName.Split(' ')[1][0].ToString() : "");
+}
+
+<section class="py-5">
+    <div class="container" style="max-width: 860px;">
+
+        @if (TempData["ProfileSuccess"] != null)
+        {
+            <div class="alert alert-success">@TempData["ProfileSuccess"]</div>
+        }
+        @if (TempData["PasswordSuccess"] != null)
+        {
+            <div class="alert alert-success">@TempData["PasswordSuccess"]</div>
+        }
+        @if (TempData["PasswordError"] != null)
+        {
+            <div class="alert alert-danger">@TempData["PasswordError"]</div>
+        }
+
+        <div class="card border-0 rounded-3 shadow-sm overflow-hidden">
+            <div class="row g-0">
+
+                <!-- Left Panel -->
+                <div class="col-md-4 d-flex flex-column align-items-center justify-content-center py-5"
+                     style="background:#0b032d; color:white;">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center mb-3"
+                         style="width:80px; height:80px; background:#e8450a;
+                                font-size:1.6rem; font-weight:700; color:white;">
+                        @initials
+                    </div>
+                    <h6 class="fw-bold mb-0">@Model.FullName</h6>
+                </div>
+
+                <!-- Right Panel -->
+                <div class="col-md-8 p-4">
+
+                    @if (!showPassword)
+                    {
+                        <!-- Account Settings Form -->
+                        <h5 class="fw-bold mb-4">Account Settings</h5>
+                        <form method="post" action="/User/UpdateProfile">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Full Name</label>
+                                    <input name="fullName" value="@Model.FullName"
+                                           class="form-control bg-light border-0" required />
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-semibold small">Mobile Number</label>
+                                    <input name="phone" value="@Model.Phone"
+                                           class="form-control bg-light border-0" />
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold small">Email Address</label>
+                                    <input value="@Model.Email"
+                                           class="form-control bg-light border-0"
+                                           disabled />
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold small">New Password</label>
+                                    <input class="form-control bg-light border-0"
+                                           placeholder="Leave blank to keep current"
+                                           disabled />
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit"
+                                        class="btn text-white fw-semibold px-4"
+                                        style="background:#e8450a; border-radius:6px;">
+                                    Update Profile
+                                </button>
+                                <a href="/User/Profile?showPassword=true"
+                                   class="btn fw-semibold px-4"
+                                   style="background:#0b032d; color:white; border-radius:6px;"
+                                   onclick="this.closest('form').submit(); return false;"
+                                   id="changePwdBtn">
+                                    Change Password
+                                </a>
+                            </div>
+                        </form>
+
+                        <!-- Hidden form to trigger password panel -->
+                        <form method="post" action="/User/ShowPasswordPanel" id="showPwdForm" class="d-none">
+                        </form>
+                        <script>
+                            document.getElementById('changePwdBtn').addEventListener('click', function (e) {
+                                e.preventDefault();
+                                document.getElementById('showPwdForm').submit();
+                            });
+                        </script>
+                    }
+                    else
+                    {
+                        <!-- Change Password Form -->
+                        <h5 class="fw-bold mb-4">Change Password</h5>
+                        <form method="post" action="/User/ChangePassword">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold small">Current Password</label>
+                                    <input name="currentPassword" type="password"
+                                           class="form-control bg-light border-0" required />
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold small">New Password</label>
+                                    <input name="newPassword" type="password"
+                                           class="form-control bg-light border-0" required />
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="form-label fw-semibold small">Confirm Password</label>
+                                    <input name="confirmPassword" type="password"
+                                           class="form-control bg-light border-0" required />
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit"
+                                        class="btn text-white fw-semibold px-4"
+                                        style="background:#e8450a; border-radius:6px;">
+                                    Change Password
+                                </button>
+                                <a href="/User/Profile"
+                                   class="btn fw-semibold px-4"
+                                   style="background:#6c757d; color:white; border-radius:6px;">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

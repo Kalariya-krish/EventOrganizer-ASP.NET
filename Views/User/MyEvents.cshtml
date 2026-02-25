@@ -1,0 +1,139 @@
+﻿@model List<EventOrganizer_ASP.NET.ViewModels.MyEventVM>
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = "My Events";
+}
+
+<section class="py-5">
+    <div class="container" style="max-width:780px;">
+
+        <div class="text-center mb-4">
+            <h3 class="fw-bold">
+                My <span style="color:#e8450a;">Registered Events</span>
+            </h3>
+            <p class="text-muted small">Manage and view tickets for your upcoming events.</p>
+        </div>
+
+        @if (TempData["FeedbackSuccess"] != null)
+        {
+            <div class="alert alert-success">@TempData["FeedbackSuccess"]</div>
+        }
+
+        @if (Model.Count == 0)
+        {
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-calendar-x" style="font-size:3rem; color:#ddd;"></i>
+                <p class="mt-3">You have not registered for any events yet.</p>
+                <a href="/Event/Index" class="btn text-white"
+                   style="background:#e8450a; border-radius:6px;">Browse Events</a>
+            </div>
+        }
+        else
+        {
+            @foreach (var ev in Model)
+            {
+                <div class="card border rounded-3 p-3 mb-3 shadow-sm">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <!-- Status Badge -->
+                            <span class="badge rounded-pill px-3 py-1 mb-2"
+                                  style="font-size:0.72rem;
+                                                 background:@(ev.Status == "Upcoming" ? "#e8f5e9" : "#fce4ec");
+                                                 color:@(ev.Status == "Upcoming" ? "#2e7d32" : "#c62828");">
+                                @ev.Status.ToUpper()
+                            </span>
+                            <h6 class="fw-bold mb-1">@ev.Title</h6>
+                            <div class="text-muted small">
+                                <i class="bi bi-calendar3 me-1"></i>
+                                @ev.EventDate.ToString("MMM dd, yyyy")
+                                &nbsp;
+                                <i class="bi bi-geo-alt me-1 ms-2"></i>
+                                @ev.Location
+                            </div>
+                        </div>
+                        <div>
+                            @if (ev.Status == "Upcoming")
+                            {
+                                <a href="/Event/Detail/@ev.EventId"
+                                   class="btn btn-sm text-white fw-semibold"
+                                   style="background:#e8450a; border-radius:6px;">
+                                    View Event
+                                </a>
+                            }
+                            else if (!ev.HasReview)
+                            {
+                                <button class="btn btn-sm text-white fw-semibold"
+                                        style="background:#e8450a; border-radius:6px;"
+                                        onclick="openFeedbackModal(@ev.EventId, '@Html.Raw(ev.Title.Replace("'", "\\'"))')">
+                                    Give Feedback
+                                </button>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary px-3 py-2">Reviewed</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</section>
+
+<!-- Feedback Modal -->
+<div class="modal fade" id="feedbackModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-3 shadow">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Give Feedback</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4">
+                <p class="text-muted small mb-3" id="feedback_EventTitle"></p>
+                <form method="post" action="/User/GiveFeedback">
+                    <input type="hidden" name="eventId" id="feedback_EventId" />
+
+                    <label class="form-label fw-semibold small">Rating</label>
+                    <div class="d-flex gap-2 mb-3" id="starContainer">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="bi bi-star fs-4"
+                               style="cursor:pointer; color:#e8450a;"
+                               data-val="@i"
+                               onclick="setRating(@i)"></i>
+                        }
+                    </div>
+                    <input type="hidden" name="rating" id="feedback_Rating" value="5" />
+
+                    <label class="form-label fw-semibold small">Comment</label>
+                    <textarea name="comment" class="form-control bg-light border-0"
+                              rows="3" placeholder="Share your experience..."></textarea>
+
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn text-white fw-semibold px-4"
+                                style="background:#e8450a; border-radius:6px;">
+                            Submit Feedback
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openFeedbackModal(eventId, title) {
+        document.getElementById('feedback_EventId').value    = eventId;
+        document.getElementById('feedback_EventTitle').innerText = title;
+        setRating(5);
+        new bootstrap.Modal(document.getElementById('feedbackModal')).show();
+    }
+
+    function setRating(val) {
+        document.getElementById('feedback_Rating').value = val;
+        document.querySelectorAll('#starContainer i').forEach(function (star) {
+            star.classList.toggle('bi-star-fill', star.dataset.val <= val);
+            star.classList.toggle('bi-star',      star.dataset.val >  val);
+        });
+    }
+</script>

@@ -1,0 +1,127 @@
+﻿@model EventOrganizer_ASP.NET.ViewModels.EventDetailVM
+@{
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+    ViewData["Title"] = Model.Title;
+}
+
+<section class="py-5">
+    <div class="container" style="max-width:780px;">
+
+        @if (TempData["RegisterSuccess"] != null)
+        {
+            <div class="alert alert-success">@TempData["RegisterSuccess"]</div>
+        }
+
+        <div class="mb-1">
+            <span class="badge rounded-pill px-3 py-1"
+                  style="background:#fff3ee; color:#e8450a; font-size:0.8rem;">
+                @Model.CategoryName
+            </span>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-3">
+            <h2 class="fw-bold mb-0">@Model.Title</h2>
+            @if (Model.IsRegistered)
+            {
+                <span class="btn text-white fw-semibold px-4"
+                      style="background:#28a745; border-radius:6px; cursor:default;">
+                    ✓ Already Registered
+                </span>
+            }
+            else
+            {
+                <form method="post" action="/User/RegisterEvent">
+                    <input type="hidden" name="eventId" value="@Model.EventId" />
+                    <button type="submit" class="btn text-white fw-semibold px-4"
+                            style="background:#e8450a; border-radius:6px;">
+                        Register For Event
+                    </button>
+                </form>
+            }
+        </div>
+
+        <!-- Organizer -->
+        <div class="d-flex align-items-center mb-4">
+            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-2"
+                 style="width:32px; height:32px; color:white;">
+                <i class="bi bi-person"></i>
+            </div>
+            <span class="text-muted small">Organized by <strong>@Model.OrganizerName</strong></span>
+        </div>
+
+        <!-- Date & Location -->
+        <div class="d-flex flex-wrap gap-4 mb-4">
+            <div class="d-flex align-items-center gap-2">
+                <div class="rounded-2 p-2" style="background:#fff3ee;">
+                    <i class="bi bi-calendar3" style="color:#e8450a;"></i>
+                </div>
+                <div>
+                    <div class="fw-semibold small">@Model.EventDate.ToString("dddd, MMM dd, yyyy")</div>
+                    <div class="text-muted small">
+                        @DateTime.Today.Add(Model.EventTime).ToString("h:mm tt")
+                    </div>
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <div class="rounded-2 p-2" style="background:#fff3ee;">
+                    <i class="bi bi-geo-alt" style="color:#e8450a;"></i>
+                </div>
+                <div>
+                    <div class="fw-semibold small">@Model.Location</div>
+                    <div class="text-muted small">Venue</div>
+                </div>
+            </div>
+        </div>
+
+        <hr>
+
+        <h5 class="fw-bold mb-2">About this event</h5>
+        <p class="text-muted" style="line-height:1.8;">@Model.Description</p>
+
+        <h5 class="fw-bold mt-4 mb-3">What to expect:</h5>
+        <ul class="list-unstyled">
+            <li class="mb-2">
+                <i class="bi bi-check-circle-fill me-2" style="color:#e8450a;"></i>
+                Keynote speeches from industry leaders
+            </li>
+            <li class="mb-2">
+                <i class="bi bi-check-circle-fill me-2" style="color:#e8450a;"></i>
+                Hands-on coding workshops. Bring your laptops.
+            </li>
+            <li class="mb-2">
+                <i class="bi bi-check-circle-fill me-2" style="color:#e8450a;"></i>
+                Connect with a network of forward-thinking peers
+            </li>
+        </ul>
+
+        <hr>
+
+        <!-- Reviews -->
+        <h5 class="fw-bold mt-4 mb-3">
+            Recent Feedback
+            <span class="text-muted fw-normal fs-6">(@Model.Reviews.Count)</span>
+        </h5>
+
+        @if (Model.Reviews.Count == 0)
+        {
+            <p class="text-muted">No reviews yet.</p>
+        }
+        else
+        {
+            @foreach (var rev in Model.Reviews)
+            {
+                <div class="mb-3 pb-3 border-bottom">
+                    <div class="mb-1">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="bi @(i <= rev.Rating ? "bi-star-fill" : "bi-star")"
+                               style="color:#e8450a; font-size:0.8rem;"></i>
+                        }
+                        <span class="ms-2 fw-semibold small">@rev.FullName</span>
+                    </div>
+                    <p class="text-muted small mb-0">@rev.Comment</p>
+                </div>
+            }
+        }
+    </div>
+</section>

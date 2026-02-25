@@ -1,0 +1,54 @@
+﻿@model List<EventOrganizer_ASP.NET.ViewModels.AdminReviewVM>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+<h3>Ratings and Reviews</h3>
+
+<div class="card p-3 shadow mt-3">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Review ID</th>
+                <th>User</th>
+                <th>Event</th>
+                <th>Rating</th>
+                <th>Comment</th>
+                <th>Created Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>#@item.ReviewId</td>
+                    <td>@item.UserName</td>
+                    <td>@item.EventTitle</td>
+                    <td>
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            if (i <= item.Rating)
+                            {
+                                <span style="color:orange;">★</span>
+                            }
+                            else
+                            {
+                                <span style="color:#ccc;">★</span>
+                            }
+                        }
+                    </td>
+                    <td>@item.Comment</td>
+                    <td>@item.CreatedAt.ToString("MMM dd, yyyy")</td>
+                    <td>
+                        <a href="/Admin/Review/Delete/@item.ReviewId"
+                           class="btn btn-danger btn-sm"
+                           onclick="return confirm('Delete this review?')">
+                            Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

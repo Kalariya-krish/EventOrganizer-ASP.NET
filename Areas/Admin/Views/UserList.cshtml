@@ -1,0 +1,95 @@
+﻿@model List<EventOrganizer_ASP.NET.Areas.Admin.ViewModels.AdminUserVM>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Admin User List";
+}
+
+<h3 class="fw-bold mb-4">Registered Users</h3>
+
+<div class="card border rounded-3 p-3 shadow-sm">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th>UserID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Password</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model)
+            {
+                <tr>
+                    <td>#USR@(user.UserId.ToString("D3"))</td>
+                    <td>@user.FullName</td>
+                    <td>@user.Email</td>
+                    <td>@user.Phone</td>
+                    <td>@user.Password</td>
+                    <td>
+                        <button class="btn btn-sm text-white fw-semibold"
+                                style="background-color: #e8450a; border-radius: 6px;"
+                                onclick="openProfileModal(
+                                        '@user.UserId.ToString("D3")',
+                                        '@Html.Raw(user.FullName.Replace("'", "\\'"))',
+                                        '@user.Email',
+                                        '@user.Phone')">
+                            View Profile
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- View Profile Modal -->
+<div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered">
+        <div class="modal-content border-0 rounded-3 shadow">
+            <div class="modal-body p-4">
+                <table class="table table-borderless mb-3">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold">UserID</td>
+                            <td id="profile_UserId"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Name</td>
+                            <td id="profile_Name"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Email</td>
+                            <td id="profile_Email"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Mobile</td>
+                            <td id="profile_Phone"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-center">
+                    <button type="button"
+                            class="btn text-white fw-semibold px-4"
+                            style="background-color: #e8450a; border-radius: 6px;"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openProfileModal(userId, name, email, phone) {
+        document.getElementById('profile_UserId').innerText = '#USR' + userId;
+        document.getElementById('profile_Name').innerText   = name;
+        document.getElementById('profile_Email').innerText  = email;
+        document.getElementById('profile_Phone').innerText  = phone;
+
+        var modal = new bootstrap.Modal(document.getElementById('profileModal'));
+        modal.show();
+    }
+</script>

@@ -1,0 +1,44 @@
+﻿@model List<EventOrganizer_ASP.NET.Areas.Admin.ViewModels.AdminRegistrationVM>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Admin Registration";
+}
+
+<h3 class="fw-bold mb-4">Event Registrations</h3>
+
+<div class="card border rounded-3 p-3 shadow-sm">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th>RegID</th>
+                <th>Event Name</th>
+                <th>User Name</th>
+                <th>Email</th>
+                <th>Registration Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted py-4">
+                        No registrations found.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var reg in Model)
+                {
+                    <tr>
+                        <td>#REG@(reg.RegistrationId.ToString("D3"))</td>
+                        <td>@reg.EventTitle</td>
+                        <td>@reg.FullName</td>
+                        <td>@reg.Email</td>
+                        <td>@reg.RegistrationDate.ToString("MMM dd, yyyy")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

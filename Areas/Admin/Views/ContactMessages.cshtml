@@ -1,0 +1,127 @@
+﻿@model List<EventOrganizer_ASP.NET.Areas.Admin.ViewModels.AdminContactVM>
+@{
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Admin Contact Messages";
+}
+
+<h3 class="fw-bold mb-4">Contact Messages</h3>
+
+<div class="card border rounded-3 p-3 shadow-sm">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Count == 0)
+            {
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">
+                        No contact messages found.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var msg in Model)
+                {
+                    <tr>
+                        <td>#MSG@(msg.MessageId.ToString("D3"))</td>
+                        <td>@msg.FullName</td>
+                        <td>@msg.Email</td>
+                        <td>@msg.Subject</td>
+                        <td>@msg.CreatedAt.ToString("MMM dd, yyyy")</td>
+                        <td>
+                            <button class="btn btn-sm text-white fw-semibold me-1"
+                                    style="background-color: #e8450a; border-radius: 6px;"
+                                    onclick="openMessageModal(
+                                                '@msg.MessageId.ToString("D3")',
+                                                '@Html.Raw(msg.FullName.Replace("'", "\\'"))',
+                                                '@msg.Email',
+                                                '@Html.Raw(msg.Subject.Replace("'", "\\'"))',
+                                                '@Html.Raw(msg.Message.Replace("'", "\\'").Replace("\n", "\\n").Replace("\r", ""))',
+                                                '@msg.CreatedAt.ToString("MMM dd, yyyy")')">
+                                View
+                            </button>
+                            <a href="/Admin/Contact/Delete/@msg.MessageId"
+                               class="btn btn-danger btn-sm"
+                               onclick="return confirm('Delete this message?')">
+                                Delete
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- View Message Modal -->
+<div class="modal fade" id="messageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-3 shadow">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Message Detail</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body px-4">
+                <table class="table table-borderless mb-3">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold" style="width:100px;">Msg ID</td>
+                            <td id="modal_MsgId"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Name</td>
+                            <td id="modal_Name"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Email</td>
+                            <td id="modal_Email"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Subject</td>
+                            <td id="modal_Subject"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Date</td>
+                            <td id="modal_Date"></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold align-top">Message</td>
+                            <td id="modal_Message" style="white-space: pre-wrap;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="text-center pb-2">
+                    <button type="button"
+                            class="btn text-white fw-semibold px-4"
+                            style="background-color: #e8450a; border-radius: 6px;"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openMessageModal(msgId, name, email, subject, message, date) {
+        document.getElementById('modal_MsgId').innerText   = '#MSG' + msgId;
+        document.getElementById('modal_Name').innerText    = name;
+        document.getElementById('modal_Email').innerText   = email;
+        document.getElementById('modal_Subject').innerText = subject;
+        document.getElementById('modal_Message').innerText = message.replace(/\\n/g, '\n');
+        document.getElementById('modal_Date').innerText    = date;
+
+        var modal = new bootstrap.Modal(document.getElementById('messageModal'));
+        modal.show();
+    }
+</script>

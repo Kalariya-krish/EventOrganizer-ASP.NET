@@ -1,8 +1,90 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    var isLoggedIn = Context.Session.GetString("Role") == "User";
+    Layout = isLoggedIn
+        ? "~/Views/Shared/_UserLayout.cshtml"
+        : "~/Views/Shared/_GuestLayout.cshtml";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- HERO SECTION -->
+<section class="text-center py-5" style="background:#f9f9f9;">
+    <div class="container py-4">
+        <h1 class="fw-bold display-5">Making Every Event</h1>
+        <h1 class="fw-bold display-5" style="color:#b0b0b0;">Memorable</h1>
+        <p class="text-muted mt-3 mb-1">
+            Eventalk is the all-in-one platform to organize, manage, and analyze your events.
+        </p>
+        <p class="text-muted">
+            From <a href="/Event/Index" style="color:#e8450a;">ticket sales</a> to real-time check-ins.
+        </p>
+        <a href="/Event/Index" class="btn mt-3 text-white fw-semibold px-4 py-2"
+           style="background-color:#e8450a; border-radius:6px;">
+            Create Event
+        </a>
+    </div>
+</section>
+
+<!-- STATS SECTION -->
+<section style="background:#0b032d; color:white;">
+    <div class="container">
+        <div class="row text-center py-4">
+            <div class="col-6 col-md-3 py-3">
+                <div class="fw-bold fs-4">500+</div>
+                <div class="text-muted">Events Organized</div>
+            </div>
+            <div class="col-6 col-md-3 py-3">
+                <div class="fw-bold fs-4">10k+</div>
+                <div class="text-muted">User Registrations</div>
+            </div>
+            <div class="col-6 col-md-3 py-3">
+                <div class="fw-bold fs-4">4.9/5</div>
+                <div class="text-muted">User Rating</div>
+            </div>
+            <div class="col-6 col-md-3 py-3">
+                <div class="fw-bold fs-4">100+</div>
+                <div class="text-muted">Active Events</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section style="background:#f4f4f4;">
+    <div class="container py-5">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 rounded-3 p-4 h-100 shadow-sm">
+                    <div class="mb-3" style="color:#e8450a; font-size:1.8rem;">
+                        <i class="bi bi-person-check"></i>
+                    </div>
+                    <h6 class="fw-bold">Easy Registration</h6>
+                    <p class="text-muted small">
+                        Attendees can register in seconds. Our optimized flow reduces drop-offs and increases ticket sales.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 rounded-3 p-4 h-100 shadow-sm">
+                    <div class="mb-3" style="color:#e8450a; font-size:1.8rem;">
+                        <i class="bi bi-bar-chart-line"></i>
+                    </div>
+                    <h6 class="fw-bold">Admin Controls</h6>
+                    <p class="text-muted small">
+                        Manage everything from one dashboard. Track sales, manage guest lists, and issue refunds instantly.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 rounded-3 p-4 h-100 shadow-sm">
+                    <div class="mb-3" style="color:#e8450a; font-size:1.8rem;">
+                        <i class="bi bi-shield-lock"></i>
+                    </div>
+                    <h6 class="fw-bold">Secure Data</h6>
+                    <p class="text-muted small">
+                        Your user data is encrypted and safe. We prioritize privacy and security for all event organizers.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
