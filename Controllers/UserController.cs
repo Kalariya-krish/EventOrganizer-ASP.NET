@@ -1,4 +1,5 @@
 ﻿using EventOrganizer_ASP.NET.DAL;
+using EventOrganizer_ASP.NET.Services;
 using EventOrganizer_ASP.NET.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,7 +12,13 @@ namespace EventOrganizer_ASP.NET.Controllers
     public class UserController : Controller
     {
         private readonly DbHelper _dbHelper;
-        public UserController(DbHelper dbHelper) { _dbHelper = dbHelper; }
+        private readonly UnsplashService _unsplashService;
+
+        public UserController(DbHelper dbHelper, UnsplashService unsplashService)
+        {
+            _dbHelper = dbHelper;
+            _unsplashService = unsplashService;
+        }
 
         private int? GetUserId() =>
             int.TryParse(HttpContext.Session.GetString("UserId"), out var id) ? id : id;
@@ -26,10 +33,8 @@ namespace EventOrganizer_ASP.NET.Controllers
         }
 
         // ================= EVENTS (User version) =================
-        public IActionResult Events(string category = "All")
+        public async Task<IActionResult> Events(string category = "All")
         {
-            if (!IsUser()) return RedirectToAction("Login", "Account");
-
             var events = new List<EventCardVM>();
             var categories = new List<string> { "All" };
 
@@ -44,16 +49,18 @@ namespace EventOrganizer_ASP.NET.Controllers
                 catReader.Close();
 
                 var cmd = new SqlCommand(@"
-                    SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
-                           E.Location, C.CategoryName,
-                           (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
-                    FROM Events E
-                    LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
-                    WHERE (@category = 'All' OR C.CategoryName = @category)
-                    ORDER BY E.EventDate ASC", con);
+            SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
+                   E.Location, C.CategoryName,
+                   (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
+            FROM Events E
+            LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
+            WHERE (@category = 'All' OR C.CategoryName = @category)
+            ORDER BY E.EventDate ASC", con);
+
                 cmd.Parameters.AddWithValue("@category", category);
 
                 var reader = cmd.ExecuteReader();
+
                 while (reader.Read())
                 {
                     events.Add(new EventCardVM
@@ -63,7 +70,7 @@ namespace EventOrganizer_ASP.NET.Controllers
                         Description = reader["Description"]?.ToString() ?? "",
                         EventDate = Convert.ToDateTime(reader["EventDate"]),
                         EventTime = reader["EventTime"] != DBNull.Value
-                                              ? (TimeSpan)reader["EventTime"] : TimeSpan.Zero,
+                            ? (TimeSpan)reader["EventTime"] : TimeSpan.Zero,
                         Location = reader["Location"]?.ToString() ?? "",
                         CategoryName = reader["CategoryName"]?.ToString() ?? "",
                         RegisteredCount = Convert.ToInt32(reader["RegisteredCount"])
@@ -71,34 +78,41 @@ namespace EventOrganizer_ASP.NET.Controllers
                 }
             }
 
+            // ✅ ADD API IMAGE
+            foreach (var ev in events)
+            {
+                var query = string.IsNullOrEmpty(ev.CategoryName) ? ev.Title : ev.CategoryName;
+                var img = await _unsplashService.GetEventImage(query);
+                ev.ImageUrl = img ?? "/images/default-event.jpg";
+            }
+
             ViewBag.Categories = categories;
             ViewBag.SelectedCategory = category;
+
             return View("~/Views/User/Events.cshtml", events);
         }
 
         // ================= EVENT DETAIL (User version) =================
-        public IActionResult EventDetail(int id)
+        public async Task<IActionResult> EventDetail(int id)
         {
-            if (!IsUser()) return RedirectToAction("Login", "Account");
-
             EventDetailVM vm = null;
-            var userId = GetUserId();
 
             using (var con = _dbHelper.GetConnection())
             {
                 con.Open();
                 var cmd = new SqlCommand(@"
-                    SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
-                           E.Location, C.CategoryName,
-                           U.FullName AS OrganizerName,
-                           (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
-                    FROM Events E
-                    LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
-                    LEFT JOIN Users      U ON E.EventId    = U.UserId
-                    WHERE E.EventId = @id", con);
+    SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
+           E.Location, C.CategoryName,
+           U.FullName AS OrganizerName,
+           (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
+    FROM Events E
+    LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
+    LEFT JOIN Users U ON E.EventId = U.UserId
+    WHERE E.EventId = @id", con);
                 cmd.Parameters.AddWithValue("@id", id);
 
                 var reader = cmd.ExecuteReader();
+
                 if (reader.Read())
                 {
                     vm = new EventDetailVM
@@ -108,48 +122,21 @@ namespace EventOrganizer_ASP.NET.Controllers
                         Description = reader["Description"]?.ToString() ?? "",
                         EventDate = Convert.ToDateTime(reader["EventDate"]),
                         EventTime = reader["EventTime"] != DBNull.Value
-                                              ? (TimeSpan)reader["EventTime"] : TimeSpan.Zero,
+                            ? (TimeSpan)reader["EventTime"] : TimeSpan.Zero,
                         Location = reader["Location"]?.ToString() ?? "",
                         CategoryName = reader["CategoryName"]?.ToString() ?? "",
-                        OrganizerName = reader["OrganizerName"]?.ToString() ?? "Eventalk Team",
-                        RegisteredCount = Convert.ToInt32(reader["RegisteredCount"])
+                        OrganizerName = reader["OrganizerName"]?.ToString() ?? "Eventalk Team"
                     };
-                }
-                reader.Close();
-
-                if (vm != null)
-                {
-                    // Check if already registered
-                    var regCmd = new SqlCommand(@"
-                        SELECT COUNT(1) FROM Registrations
-                        WHERE UserId=@uid AND EventId=@eid", con);
-                    regCmd.Parameters.AddWithValue("@uid", userId);
-                    regCmd.Parameters.AddWithValue("@eid", id);
-                    vm.IsRegistered = Convert.ToInt32(regCmd.ExecuteScalar()) > 0;
-
-                    vm.Reviews = new List<EventReviewVM>();
-                    var revCmd = new SqlCommand(@"
-                        SELECT U.FullName, R.Rating, R.Comment, R.CreatedAt
-                        FROM Reviews R
-                        INNER JOIN Users U ON R.UserId = U.UserId
-                        WHERE R.EventId = @id
-                        ORDER BY R.CreatedAt DESC", con);
-                    revCmd.Parameters.AddWithValue("@id", id);
-                    var revReader = revCmd.ExecuteReader();
-                    while (revReader.Read())
-                    {
-                        vm.Reviews.Add(new EventReviewVM
-                        {
-                            FullName = revReader["FullName"].ToString(),
-                            Rating = Convert.ToInt32(revReader["Rating"]),
-                            Comment = revReader["Comment"]?.ToString() ?? "",
-                            CreatedAt = Convert.ToDateTime(revReader["CreatedAt"])
-                        });
-                    }
                 }
             }
 
             if (vm == null) return NotFound();
+
+            // ✅ ADD IMAGE HERE
+            var queryText = string.IsNullOrEmpty(vm.CategoryName) ? vm.Title : vm.CategoryName;
+            var img = await _unsplashService.GetEventImage(queryText);
+            vm.ImageUrl = img ?? "/images/default-event.jpg";
+
             return View("~/Views/User/EventDetail.cshtml", vm);
         }
 

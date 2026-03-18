@@ -28,6 +28,8 @@ namespace EventOrganizer_ASP.NET.Controllers
                 return View(user);
 
             user.Role = "User";
+            if (string.IsNullOrEmpty(user.Phone))
+                user.Phone = "0"; // or ""
 
             _userDAL.InsertUser(user);
 

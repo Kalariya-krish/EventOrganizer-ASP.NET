@@ -15,6 +15,29 @@ namespace EventOrganizer_ASP.NET.Controllers
             var role = HttpContext.Session.GetString("Role");
             if (role == "Admin")
                 return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
+
+            using (var con = _dbHelper.GetConnection())
+            {
+                con.Open();
+                var cmd = new SqlCommand(@"
+            SELECT
+                (SELECT COUNT(*) FROM Events)                                   AS TotalEvents,
+                (SELECT COUNT(*) FROM Registrations)                            AS TotalRegistrations,
+                (SELECT COUNT(*) FROM Events WHERE EventDate >= CAST(GETDATE() AS DATE)) AS ActiveEvents,
+                (SELECT ISNULL(CAST(AVG(CAST(Rating AS FLOAT)) AS DECIMAL(3,1)), 0)
+                 FROM Reviews)                                                  AS AvgRating
+        ", con);
+
+                var reader = cmd.ExecuteReader();
+                if (reader.Read())
+                {
+                    ViewBag.TotalEvents = reader["TotalEvents"].ToString();
+                    ViewBag.TotalRegistrations = reader["TotalRegistrations"].ToString();
+                    ViewBag.ActiveEvents = reader["ActiveEvents"].ToString();
+                    ViewBag.AvgRating = reader["AvgRating"].ToString();
+                }
+            }
+
             return View();
         }
 

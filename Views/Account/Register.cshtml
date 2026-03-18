@@ -7,63 +7,91 @@
 <html>
 <head>
     <title>Register - Eventtalk</title>
+
+    <!-- FIXED CDN (you had typo: mian.css ❌) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 
-<body style="background-color:#f4f6f9;">
+<body class="bg-light">
 
-    <div class="container-fluid vh-100">
-        <div class="row h-100">
+    <!-- Back -->
+    <div class="position-absolute top-0 start-0 m-4">
+        <a href="/Account/Login" class="text-decoration-none text-secondary fw-semibold">
+            <i class="bi bi-arrow-left"></i> Back to Login
+        </a>
+    </div>
 
-            <!-- LEFT SIDE FORM -->
-            <div class="col-md-6 d-flex justify-content-center align-items-center bg-white">
-                <div class="col-md-8">
+    <div class="container vh-100 d-flex justify-content-center align-items-center">
 
-                    <h3>Create an account</h3>
-                    <p class="text-muted">Start your journey with Eventtalk today.</p>
+        <!-- CARD -->
+        <div class="col-md-5 col-lg-4">
 
-                    <form asp-action="Register" asp-controller="Account" method="post">
+            <div class="border rounded-4 shadow-sm p-4 bg-white">
 
-                        <div class="mb-3">
-                            <label>Full Name</label>
-                            <input asp-for="FullName" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Email</label>
-                            <input asp-for="Email" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Password</label>
-                            <input asp-for="Password" type="password" class="form-control" required />
-                        </div>
-
-                        <div class="mb-3">
-                            <label>Phone</label>
-                            <input asp-for="Phone" class="form-control" />
-                        </div>
-
-                        <button type="submit" class="btn w-100 text-white"
-                                style="background-color:#ff6b00;">
-                            Create Account
-                        </button>
-
-                    </form>
-
-                </div>
-            </div>
-
-            <!-- RIGHT SIDE INFO PANEL -->
-            <div class="col-md-6 d-flex justify-content-center align-items-center"
-                 style="background-color:#f8f9fa;">
-
-                <div class="text-center px-5">
-                    <h3>Discover the best events happening around you.</h3>
-                    <p class="text-muted mt-3">
-                        Join thousands of people discovering workshops,
-                        tech summits, and live music locally and globally.
+                <!-- Heading -->
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold">Create an account</h3>
+                    <p class="text-muted small">
+                        Start your journey with Eventtalk today.
                     </p>
+                </div>
+
+                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                <form asp-action="Register" asp-controller="Account" method="post">
+
+                    <!-- Full Name -->
+                    <label class="fw-semibold small">Full Name</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-person text-muted"></i>
+                        </span>
+                        <input asp-for="FullName" class="form-control" placeholder="Kris Kalariya" required />
+                        <span asp-validation-for="FullName" class="text-danger"></span>
+                    </div>
+
+                    <!-- Email -->
+                    <label class="fw-semibold small">Email Address</label>
+                    <div class="input-group mb-3">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-envelope text-muted"></i>
+                        </span>
+                        <input asp-for="Email" class="form-control" placeholder="name@example.com" required />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <!-- Password -->
+                    <label class="fw-semibold small">Password</label>
+                    <div class="input-group mb-1">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-lock text-muted"></i>
+                        </span>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Create a strong password" required />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    @* <div class="text-muted small mb-3">
+                        Must be at least 6 characters long.
+                    </div> *@
+
+                    <!-- Button -->
+                    <button type="submit" class="btn w-100 text-white fw-semibold py-2"
+                            style="background:#ff6b00;">
+                        Create Account
+                    </button>
+
+                </form>
+
+                <!-- Bottom -->
+                <div class="text-center mt-3">
+                    <span class="text-muted small">Already have an account? </span>
+                    <a href="/Account/Login" class="fw-semibold text-decoration-none"
+                       style="color:#ff6b00;">
+                        Sign in
+                    </a>
                 </div>
 
             </div>

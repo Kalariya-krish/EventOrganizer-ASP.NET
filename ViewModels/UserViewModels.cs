@@ -13,6 +13,7 @@ namespace EventOrganizer_ASP.NET.ViewModels
         public string Location { get; set; } = string.Empty;
         public string CategoryName { get; set; } = string.Empty;
         public int RegisteredCount { get; set; }
+        public string ImageUrl { get; set; }
     }
 
     public class EventDetailVM
@@ -28,6 +29,7 @@ namespace EventOrganizer_ASP.NET.ViewModels
         public int RegisteredCount { get; set; }
         public bool IsRegistered { get; set; }
         public List<EventReviewVM> Reviews { get; set; } = new();
+        public string ImageUrl { get; set; }
     }
 
     public class EventReviewVM

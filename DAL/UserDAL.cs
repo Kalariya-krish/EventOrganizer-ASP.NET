@@ -18,14 +18,14 @@ namespace EventOrganizer_ASP.NET.DAL
             {
                 string query = @"INSERT INTO Users 
                                 (FullName, Email, Password, Phone, Role, CreatedAt)
-                                VALUES (@FullName, @Email, @Password, @Phone, @Role, GETDATE())";
+                                VALUES (@FullName, @Email, @Password, ISNULL(@Phone, ''), ISNULL(@Role, 'User'), GETDATE())";
 
                 SqlCommand cmd = new SqlCommand(query, con);
                 cmd.Parameters.AddWithValue("@FullName", user.FullName);
                 cmd.Parameters.AddWithValue("@Email", user.Email);
                 cmd.Parameters.AddWithValue("@Password", user.Password);
                 cmd.Parameters.AddWithValue("@Phone", user.Phone ?? "");
-                cmd.Parameters.AddWithValue("@Role", user.Role);
+                cmd.Parameters.AddWithValue("@Role", user.Role ?? "User");
 
                 con.Open();
                 cmd.ExecuteNonQuery();

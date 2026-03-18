@@ -11,38 +11,38 @@
     <div class="container py-4">
         <h1 class="fw-bold display-5">Making Every Event</h1>
         <h1 class="fw-bold display-5" style="color:#b0b0b0;">Memorable</h1>
-        <p class="text-muted mt-3 mb-1">
-            Eventalk is the all-in-one platform to organize, manage, and analyze your events.
+        <p class="text-muted mt-3" style="max-width:550px; margin:auto; line-height:1.8;">
+            Eventalk is your all-in-one platform to discover, join, and manage events
+            effortlessly. Whether you're attending a tech summit, a music fest, or a
+            community meetup — we make every experience seamless from registration to check-in.
         </p>
-        <p class="text-muted">
-            From <a href="/Event/Index" style="color:#e8450a;">ticket sales</a> to real-time check-ins.
-        </p>
-        <a href="/Event/Index" class="btn mt-3 text-white fw-semibold px-4 py-2"
+        <a href="@(isLoggedIn ? "/User/Events" : "/Event/Index")"
+           class="btn mt-3 text-white fw-semibold px-4 py-2"
            style="background-color:#e8450a; border-radius:6px;">
-            Create Event
+            Explore Events
         </a>
     </div>
 </section>
 
-<!-- STATS SECTION -->
+<!-- STATS SECTION (Dynamic) -->
 <section style="background:#0b032d; color:white;">
     <div class="container">
         <div class="row text-center py-4">
             <div class="col-6 col-md-3 py-3">
-                <div class="fw-bold fs-4">500+</div>
-                <div class="text-muted">Events Organized</div>
+                <div class="fw-bold fs-4">@ViewBag.TotalEvents+</div>
+                <div style="color:#aaa;">Events Organized</div>
             </div>
             <div class="col-6 col-md-3 py-3">
-                <div class="fw-bold fs-4">10k+</div>
-                <div class="text-muted">User Registrations</div>
+                <div class="fw-bold fs-4">@ViewBag.TotalRegistrations+</div>
+                <div style="color:#aaa;">User Registrations</div>
             </div>
             <div class="col-6 col-md-3 py-3">
-                <div class="fw-bold fs-4">4.9/5</div>
-                <div class="text-muted">User Rating</div>
+                <div class="fw-bold fs-4">@ViewBag.AvgRating/5</div>
+                <div style="color:#aaa;">User Rating</div>
             </div>
             <div class="col-6 col-md-3 py-3">
-                <div class="fw-bold fs-4">100+</div>
-                <div class="text-muted">Active Events</div>
+                <div class="fw-bold fs-4">@ViewBag.ActiveEvents+</div>
+                <div style="color:#aaa;">Active Events</div>
             </div>
         </div>
     </div>
@@ -59,7 +59,8 @@
                     </div>
                     <h6 class="fw-bold">Easy Registration</h6>
                     <p class="text-muted small">
-                        Attendees can register in seconds. Our optimized flow reduces drop-offs and increases ticket sales.
+                        Attendees can register in seconds. Our optimized flow reduces
+                        drop-offs and increases ticket sales.
                     </p>
                 </div>
             </div>
@@ -70,7 +71,8 @@
                     </div>
                     <h6 class="fw-bold">Admin Controls</h6>
                     <p class="text-muted small">
-                        Manage everything from one dashboard. Track sales, manage guest lists, and issue refunds instantly.
+                        Manage everything from one dashboard. Track sales, manage
+                        guest lists, and issue refunds instantly.
                     </p>
                 </div>
             </div>
@@ -81,7 +83,8 @@
                     </div>
                     <h6 class="fw-bold">Secure Data</h6>
                     <p class="text-muted small">
-                        Your user data is encrypted and safe. We prioritize privacy and security for all event organizers.
+                        Your user data is encrypted and safe. We prioritize privacy
+                        and security for all event organizers.
                     </p>
                 </div>
             </div>

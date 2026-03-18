@@ -1,4 +1,5 @@
 using EventOrganizer_ASP.NET.DAL;
+using EventOrganizer_ASP.NET.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Services.AddSession();
 builder.Services.AddScoped<DbHelper>();
 builder.Services.AddScoped<UserDAL>();
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddHttpClient<UnsplashService>();
 
 var app = builder.Build();
 
