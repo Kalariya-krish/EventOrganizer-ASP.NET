@@ -155,11 +155,31 @@ namespace EventOrganizer_ASP.NET.Areas.Admin.Controllers
             using (var con = _dbHelper.GetConnection())
             {
                 con.Open();
-                var cmd = new SqlCommand("DELETE FROM Events WHERE EventId=@id", con);
-                cmd.Parameters.AddWithValue("@id", id);
-                cmd.ExecuteNonQuery();
+
+                // DELETE REVIEWS
+                var reviewCmd = new SqlCommand(
+                    "DELETE FROM Reviews WHERE EventId=@id", con);
+
+                reviewCmd.Parameters.AddWithValue("@id", id);
+                reviewCmd.ExecuteNonQuery();
+
+                // DELETE REGISTRATIONS
+                var regCmd = new SqlCommand(
+                    "DELETE FROM Registrations WHERE EventId=@id", con);
+
+                regCmd.Parameters.AddWithValue("@id", id);
+                regCmd.ExecuteNonQuery();
+
+                // DELETE EVENT
+                var eventCmd = new SqlCommand(
+                    "DELETE FROM Events WHERE EventId=@id", con);
+
+                eventCmd.Parameters.AddWithValue("@id", id);
+                eventCmd.ExecuteNonQuery();
             }
+
             return RedirectToAction("Index");
         }
     }
 }
+

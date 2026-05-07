@@ -49,13 +49,15 @@ namespace EventOrganizer_ASP.NET.Controllers
                 catReader.Close();
 
                 var cmd = new SqlCommand(@"
-            SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
-                   E.Location, C.CategoryName,
-                   (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
-            FROM Events E
-            LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
-            WHERE (@category = 'All' OR C.CategoryName = @category)
-            ORDER BY E.EventDate ASC", con);
+    SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
+           E.Location, C.CategoryName,
+           (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
+    FROM Events E
+    LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
+    WHERE 
+        (@category = 'All' OR C.CategoryName = @category)
+        AND E.EventDate >= CAST(GETDATE() AS DATE)
+    ORDER BY E.EventDate ASC", con);
 
                 cmd.Parameters.AddWithValue("@category", category);
 
@@ -100,16 +102,29 @@ namespace EventOrganizer_ASP.NET.Controllers
             using (var con = _dbHelper.GetConnection())
             {
                 con.Open();
+
                 var cmd = new SqlCommand(@"
-    SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
-           E.Location, C.CategoryName,
-           U.FullName AS OrganizerName,
-           (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
-    FROM Events E
-    LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
-    LEFT JOIN Users U ON E.EventId = U.UserId
-    WHERE E.EventId = @id", con);
+SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
+       E.Location, C.CategoryName,
+       U.FullName AS OrganizerName,
+
+       CASE 
+           WHEN EXISTS (
+               SELECT 1 FROM Registrations R
+               WHERE R.EventId = E.EventId
+               AND R.UserId = @uid
+           )
+           THEN 1
+           ELSE 0
+       END AS IsRegistered
+
+FROM Events E
+LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
+LEFT JOIN Users U ON E.EventId = U.UserId
+WHERE E.EventId = @id", con);
+
                 cmd.Parameters.AddWithValue("@id", id);
+                cmd.Parameters.AddWithValue("@uid", GetUserId());
 
                 var reader = cmd.ExecuteReader();
 
@@ -125,16 +140,24 @@ namespace EventOrganizer_ASP.NET.Controllers
                             ? (TimeSpan)reader["EventTime"] : TimeSpan.Zero,
                         Location = reader["Location"]?.ToString() ?? "",
                         CategoryName = reader["CategoryName"]?.ToString() ?? "",
-                        OrganizerName = reader["OrganizerName"]?.ToString() ?? "Eventalk Team"
+                        OrganizerName = reader["OrganizerName"]?.ToString() ?? "Eventalk Team",
+
+                        IsRegistered = Convert.ToInt32(reader["IsRegistered"]) == 1
                     };
                 }
+
+                reader.Close();
             }
 
             if (vm == null) return NotFound();
 
-            // ✅ ADD IMAGE HERE
-            var queryText = string.IsNullOrEmpty(vm.CategoryName) ? vm.Title : vm.CategoryName;
+            // Image
+            var queryText = string.IsNullOrEmpty(vm.CategoryName)
+                ? vm.Title
+                : vm.CategoryName;
+
             var img = await _unsplashService.GetEventImage(queryText);
+
             vm.ImageUrl = img ?? "/images/default-event.jpg";
 
             return View("~/Views/User/EventDetail.cshtml", vm);
@@ -175,18 +198,36 @@ namespace EventOrganizer_ASP.NET.Controllers
             {
                 con.Open();
                 var cmd = new SqlCommand(@"
-                    SELECT R.RegistrationId, E.EventId, E.Title, E.Location,
-                           E.EventDate, E.EventTime,
-                           CASE WHEN E.EventDate >= CAST(GETDATE() AS DATE)
-                                THEN 'Upcoming' ELSE 'Completed' END AS Status,
-                           CASE WHEN EXISTS (
-                               SELECT 1 FROM Reviews V
-                               WHERE V.UserId = R.UserId AND V.EventId = E.EventId)
-                                THEN 1 ELSE 0 END AS HasReview
-                    FROM Registrations R
-                    INNER JOIN Events E ON R.EventId = E.EventId
-                    WHERE R.UserId = @uid
-                    ORDER BY E.EventDate DESC", con);
+                    SELECT 
+    R.RegistrationId, 
+    E.EventId, 
+    E.Title, 
+    E.Location,
+    E.EventDate, 
+    E.EventTime,
+
+    CASE 
+        WHEN 
+            DATEADD(SECOND, 
+                DATEDIFF(SECOND, 0, ISNULL(E.EventTime, '00:00:00')), 
+                CAST(E.EventDate AS DATETIME)
+            ) >= GETDATE()
+        THEN 'Upcoming' 
+        ELSE 'Completed' 
+    END AS Status,
+
+    CASE 
+        WHEN EXISTS (
+            SELECT 1 FROM Reviews V
+            WHERE V.UserId = R.UserId AND V.EventId = E.EventId
+        )
+        THEN 1 ELSE 0 
+    END AS HasReview
+
+FROM Registrations R
+INNER JOIN Events E ON R.EventId = E.EventId
+WHERE R.UserId = @uid
+ORDER BY E.EventDate DESC", con);
                 cmd.Parameters.AddWithValue("@uid", userId);
 
                 var reader = cmd.ExecuteReader();

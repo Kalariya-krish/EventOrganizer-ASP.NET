@@ -41,13 +41,15 @@ namespace EventOrganizer_ASP.NET.Controllers
 
                 // events
                 var cmd = new SqlCommand(@"
-                    SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
-                           E.Location, C.CategoryName,
-                           (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
-                    FROM Events E
-                    LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
-                    WHERE (@category = 'All' OR C.CategoryName = @category)
-                    ORDER BY E.EventDate ASC", con);
+    SELECT E.EventId, E.Title, E.Description, E.EventDate, E.EventTime,
+           E.Location, C.CategoryName,
+           (SELECT COUNT(*) FROM Registrations R WHERE R.EventId = E.EventId) AS RegisteredCount
+    FROM Events E
+    LEFT JOIN Categories C ON E.CategoryId = C.CategoryId
+    WHERE 
+        (@category = 'All' OR C.CategoryName = @category)
+        AND E.EventDate >= CAST(GETDATE() AS DATE)
+    ORDER BY E.EventDate ASC", con);
 
                 cmd.Parameters.AddWithValue("@category", category);
 

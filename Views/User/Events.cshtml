@@ -15,11 +15,14 @@
         <div class="d-flex justify-content-center flex-wrap gap-2 mb-4">
             @foreach (var cat in ViewBag.Categories as List<string>)
             {
-                <a href="/User/Events?category=@cat"
+                <a asp-controller="User"
+                   asp-action="Events"
+                   asp-route-category="@cat"
                    class="btn btn-sm rounded-pill px-3"
                    style="@(cat == selected
-                                          ? "background:#e8450a; color:white; border:none;"
-                                          : "background:white; color:#333; border:1px solid #ddd;")">
+                                   ? "background:#e8450a; color:white; border:none;"
+                                   : "background:white; color:#333; border:1px solid #ddd;")">
+
                 @cat
             </a>
                         }

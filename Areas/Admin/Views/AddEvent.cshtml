@@ -27,12 +27,21 @@
 
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Event Date</label>
-                <input name="EventDate" type="date" class="form-control bg-light border-0" required />
+                <input name="EventDate"
+                       type="date"
+                       class="form-control bg-light border-0"
+                       value="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       min="@DateTime.Now.ToString("yyyy-MM-dd")"
+                       required />
             </div>
 
             <div class="col-md-6">
                 <label class="form-label fw-semibold">Event Time</label>
-                <input name="EventTime" type="time" class="form-control bg-light border-0" required />
+                <input name="EventTime"
+                       type="time"
+                       class="form-control bg-light border-0"
+                       value="@DateTime.Now.ToString("HH:mm")"
+                       required />
             </div>
 
             <div class="col-md-6">
